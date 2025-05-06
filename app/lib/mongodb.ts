@@ -1,16 +1,23 @@
-import { Db, MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
-const client = new MongoClient(process.env.MONGODB_URI || '');
-const dbName = process.env.MONGODB_DB;
+const MONGODB_URI = process.env.MONGODB_URI!;
+const dbName = process.env.MONGODB_DB!;
 
-let cachedDb: Db | null = null;
+if (!MONGODB_URI) throw new Error('MONGODB_URI is not defined');
+if (!dbName) throw new Error('MONGODB_DB is not defined');
 
-export async function connectToDatabase() {
-    if (cachedDb) {
-        return cachedDb;
+let cached = (global as any).mongoose || { conn: null, promise: null };
+
+export default async function dbConnect() {
+    if (cached.conn) return cached.conn;
+
+    if (!cached.promise) {
+        cached.promise = mongoose.connect(MONGODB_URI, {
+            dbName,
+            bufferCommands: false,
+        });
     }
 
-    await client.connect();
-    cachedDb = client.db(dbName);
-    return cachedDb;
+    cached.conn = await cached.promise;
+    (global as any).mongoose = cached;
 }

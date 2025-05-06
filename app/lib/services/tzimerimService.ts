@@ -1,10 +1,9 @@
-import { Db, Document, WithId } from 'mongodb';
+import { Document, WithId } from 'mongodb';
+import TzimerSchema from '../schemas/tzimerSchema';
 import { Tzimer } from '../../utils/interfaces';
 
-const tzimerCollection = process.env.TZIMERIM_COLLECTION_NAME || '';
-
-export const getAllTzimerim = async (db: Db): Promise<Tzimer[]> => {
-    const data = await db.collection(tzimerCollection).find({}).toArray();
+export const getAllTzimerim = async (): Promise<Tzimer[]> => {
+    const data = await TzimerSchema.find({}).lean();
 
     return data.map((tzimer: Document) => {
         const { _id, ...rest } = tzimer;
@@ -12,11 +11,8 @@ export const getAllTzimerim = async (db: Db): Promise<Tzimer[]> => {
     });
 };
 
-export const getSingleTzimer = async (
-    db: Db,
-    id: number,
-): Promise<Tzimer | null> => {
-    const data = await db.collection(tzimerCollection).findOne({ id });
+export const getSingleTzimer = async (id: number): Promise<Tzimer | null> => {
+    const data = await TzimerSchema.findOne({ id }).lean();
 
     if (!data) {
         return null;

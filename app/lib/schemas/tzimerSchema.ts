@@ -1,14 +1,24 @@
 import mongoose from 'mongoose';
 
-const tzimerSchema = new mongoose.Schema({
-    id: { type: Number, require: true },
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    location: { type: String, required: true },
-    pricePerWeekdayNight: { type: Number, required: true },
-    pricePerWeekendNight: { type: Number, required: true },
-});
+const tzimerCollection = process.env.TZIMERIM_COLLECTION_NAME;
 
-const Tzimer = mongoose.models.Tzimer || mongoose.model('Tzimer', tzimerSchema);
+if (!tzimerCollection)
+    throw new Error('Missing TZIMERIM_COLLECTION_NAME env var');
 
-export default Tzimer;
+const schema = new mongoose.Schema(
+    {
+        id: { type: Number, required: true },
+        name: { type: String, required: true },
+        description: { type: String, required: true },
+        location: { type: String, required: true },
+        pricePerWeekdayNight: { type: Number, required: true },
+        pricePerWeekendNight: { type: Number, required: true },
+    },
+    { collection: process.env.TZIMERIM_COLLECTION_NAME },
+);
+
+const TzimerSchema =
+    mongoose.models[tzimerCollection] ||
+    mongoose.model(tzimerCollection, schema);
+
+export default TzimerSchema;

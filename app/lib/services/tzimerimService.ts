@@ -1,23 +1,14 @@
-import { Document, WithId } from 'mongodb';
+import { Document } from 'mongodb';
 import TzimerSchema from '../schemas/tzimerSchema';
 import { Tzimer } from '../../utils/interfaces';
+import { transformToTzimer } from '@/app/utils/helper';
 
 export const getAllTzimerim = async (): Promise<Tzimer[]> => {
     const data = await TzimerSchema.find({}).lean();
-
-    return data.map((tzimer: Document) => {
-        const { _id, ...rest } = tzimer;
-        return { ...rest } as Tzimer;
-    });
+    return data.map((tzimer: Document) => transformToTzimer(tzimer));
 };
 
 export const getSingleTzimer = async (id: number): Promise<Tzimer | null> => {
     const data = await TzimerSchema.findOne({ id }).lean();
-
-    if (!data) {
-        return null;
-    }
-
-    const { _id, ...rest } = data as WithId<Document>;
-    return rest as Tzimer;
+    return data ? transformToTzimer(data) : null;
 };

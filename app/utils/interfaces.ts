@@ -1,5 +1,5 @@
 export interface Tzimer {
-    id: number;
+    _id: string;
     name: string;
     description: string;
     location: string;

@@ -7,7 +7,6 @@ if (!tzimerCollection)
 
 const schema = new mongoose.Schema(
     {
-        id: { type: Number, required: true },
         name: { type: String, required: true },
         description: { type: String, required: true },
         location: { type: String, required: true },

@@ -1,11 +1,6 @@
 import { NextRequest } from 'next/server';
-import { Tzimer } from './interfaces';
-import { Document } from 'mongodb';
-
-export const transformToTzimer = (doc: Document): Tzimer => {
-    const { _id, __v, ...rest } = doc;
-    return rest as Tzimer;
-};
+import { NewTzimer } from './interfaces';
+import { NewTzimerTypes } from './records';
 
 export const getQueryParams = (
     request: NextRequest,
@@ -14,4 +9,17 @@ export const getQueryParams = (
     const urlString = request.url ?? '';
     const { searchParams } = new URL(urlString);
     return searchParams.get(param);
+};
+
+export const validateNewTzimer = (data: NewTzimer) => {
+    const requiredKeys = Object.keys(NewTzimerTypes).filter(
+        (key) => key !== 'createdAt' && key !== 'updatedAt',
+    ) as Array<keyof NewTzimer>;
+
+    for (const key of requiredKeys) {
+        if (!data[key] || typeof data[key] !== NewTzimerTypes[key]) {
+            return false;
+        }
+    }
+    return true;
 };

@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import dbConnect from '@/app/lib/mongodb';
 import { getSingleTzimer } from '@/app/lib/services/tzimerimService';
 import { API_RESPONSES } from '@/app/utils/globals';
 
@@ -14,8 +13,6 @@ export const GET = async (
         if (isNaN(+id)) {
             return API_RESPONSES.BAD_REQUEST('Id is not valid');
         }
-
-        await dbConnect();
 
         const data = await getSingleTzimer(+id);
 

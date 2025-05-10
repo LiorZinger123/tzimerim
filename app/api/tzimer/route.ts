@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/app/lib/mongodb';
 import {
     createTzimer,
     deleteTzimer,
@@ -21,12 +20,14 @@ export const POST = async (request: NextRequest) => {
 
         if (body instanceof NextResponse) return body;
 
-        await dbConnect();
-
         const status = await createTzimer(body);
 
         if (status === 400) {
             return API_RESPONSES.BAD_REQUEST('Invalid data format');
+        }
+
+        if (status === 409) {
+            return API_RESPONSES.DUPLICATE('Duplicated tzimer name');
         }
 
         return API_RESPONSES.CREATED('Tzimer added successfully');
@@ -44,11 +45,9 @@ export const DELETE = async (request: NextRequest) => {
             return API_RESPONSES.BAD_REQUEST('Missing query params: name');
         }
 
-        await dbConnect();
+        const status = await deleteTzimer(name);
 
-        const data = await deleteTzimer(name);
-
-        if (!data) {
+        if (status === 404) {
             return API_RESPONSES.NOT_FOUND('Tzimer not found');
         }
 
@@ -58,7 +57,7 @@ export const DELETE = async (request: NextRequest) => {
     }
 };
 
-//Update tzimer - for tzimer owners
+// //Update tzimer - for tzimer owners
 export const PATCH = async (request: NextRequest) => {
     try {
         const name = getQueryParams(request, 'name');
@@ -76,8 +75,6 @@ export const PATCH = async (request: NextRequest) => {
             );
 
         if (body instanceof NextResponse) return body;
-
-        await dbConnect();
 
         const status = await updateTzimer(name, body);
 

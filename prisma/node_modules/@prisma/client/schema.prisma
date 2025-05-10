@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model booking {
+  id        Int      @id @default(autoincrement())
+  roomId    Int
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId], map: "Booking_roomId_fkey")
+}
+
+model tzimer {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  location    String
+  region      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model room {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String
+  capacity  Int
+  price     Float
+  resortId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resortId], map: "Room_resortId_fkey")
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  password  String
+  resortId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resortId], map: "User_resortId_fkey")
+}

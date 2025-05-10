@@ -23,10 +23,16 @@ export const API_RESPONSES = {
             { status: 400 },
         );
     },
-    NOT_FOUND: (msg: string) => {
+    NOT_FOUND: (msg?: string) => {
         return NextResponse.json(
             { message: msg || 'Not found' },
             { status: 404 },
+        );
+    },
+    DUPLICATE: (msg?: string) => {
+        return NextResponse.json(
+            { message: msg || 'Duplicate data' },
+            { status: 409 },
         );
     },
     INTERNAL_SERVER_ERROR: () => {

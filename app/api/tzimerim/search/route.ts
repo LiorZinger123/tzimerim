@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { searchTzimerim } from '@/app/lib/services/tzimerimService';
 import { API_RESPONSES } from '@/app/utils/globals';
-import dbConnect from '@/app/lib/mongodb';
 import { getQueryParams } from '@/app/utils/helper';
 
 //Search tzimer - for admin
@@ -12,8 +11,6 @@ export const GET = async (request: NextRequest) => {
         if (!search) {
             return API_RESPONSES.BAD_REQUEST('Missing query params: search');
         }
-
-        await dbConnect();
 
         const data = await searchTzimerim(search);
 

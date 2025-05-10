@@ -1,85 +1,83 @@
-import { Document } from 'mongodb';
-import TzimerSchema from '../schemas/tzimerSchema';
+import prisma from '@/prisma/prismaClient';
 import { NewTzimer, Tzimer } from '../../utils/interfaces';
-import { transformToTzimer } from '@/app/utils/helper';
-import { UnavailableDate } from '@/app/utils/interfaces';
+import { validateNewTzimer } from '@/app/utils/helper';
 
 export const getTzimerim = async (
     skip: number,
     limit: number,
 ): Promise<Tzimer[]> => {
-    const data = await TzimerSchema.find({}).skip(skip).limit(limit).lean();
-    return data.map((tzimer: Document) => transformToTzimer(tzimer));
+    return await prisma.tzimer.findMany({
+        skip: skip,
+        take: limit,
+    });
 };
 
 export const getSingleTzimer = async (id: number): Promise<Tzimer | null> => {
-    const data = await TzimerSchema.findOne({ siteId: id }).lean();
-    return data ? transformToTzimer(data) : null;
+    return await prisma.tzimer.findUnique({
+        where: { id },
+    });
 };
 
 export const createTzimer = async (data: NewTzimer): Promise<number> => {
-    if (!Array.isArray(data.unavailableDates)) return 400;
-
-    const unavailableDates = data.unavailableDates.map(
-        (dateRange: UnavailableDate) => ({
-            from: new Date(dateRange.checkIn),
-            to: new Date(dateRange.checkOut),
-        }),
-    );
-
-    let siteId: number;
-    const documents = await TzimerSchema.find()
-        .sort({ _id: -1 })
-        .limit(1)
-        .lean();
-
-    if (documents.length === 0) {
-        siteId = 1;
-    } else {
-        const lastDocument = documents[0];
-        siteId = lastDocument.siteId + 1;
-    }
-
-    const tzimer = new TzimerSchema({
-        siteId,
-        ...data,
-        unavailableDates,
-    });
-
-    try {
-        await tzimer.validate();
-    } catch {
+    if (!validateNewTzimer(data)) {
         return 400;
     }
-    await tzimer.save();
+
+    try {
+        await prisma.tzimer.create({
+            data,
+        });
+    } catch (error: any) {
+        if (error?.code === 'P2002') {
+            return 409;
+        } else {
+            throw error;
+        }
+    }
+
     return 201;
 };
 
-export const searchTzimerim = async (query: string): Promise<Tzimer[]> => {
-    const data = await TzimerSchema.find({
-        $or: [{ name: { $regex: query, $options: 'i' } }],
-    }).lean();
+export const deleteTzimer = async (name: string): Promise<number> => {
+    try {
+        await prisma.tzimer.delete({
+            where: { name },
+        });
 
-    return data.map((tzimer: Document) => transformToTzimer(tzimer));
-};
-
-export const deleteTzimer = async (name: string): Promise<Tzimer | null> => {
-    return await TzimerSchema.findOneAndDelete({ name });
+        return 204;
+    } catch (error: any) {
+        if (error?.code === 'P2025') {
+            return 404;
+        }
+        throw error;
+    }
 };
 
 export const updateTzimer = async (
     name: string,
     updateData: Partial<Tzimer>,
 ): Promise<number> => {
-    const updatedTzimer = await TzimerSchema.findOneAndUpdate(
-        { name },
-        { $set: updateData },
-        { new: true, runValidators: true },
-    ).lean();
+    try {
+        await prisma.tzimer.update({
+            where: { name },
+            data: updateData,
+        });
 
-    if (!updatedTzimer) {
-        return 404;
+        return 204;
+    } catch (error: any) {
+        if (error?.code === 'P2025') {
+            return 404;
+        }
+        throw error;
     }
+};
 
-    return 204;
+export const searchTzimerim = async (query: string): Promise<Tzimer[]> => {
+    return await prisma.tzimer.findMany({
+        where: {
+            name: {
+                contains: query,
+            },
+        },
+    });
 };

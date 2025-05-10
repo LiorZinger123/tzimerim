@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import dbConnect from '@/app/lib/mongodb';
 import { getTzimerim } from '@/app/lib/services/tzimerimService';
 import { API_RESPONSES } from '@/app/utils/globals';
 import { getQueryParams } from '@/app/utils/helper';
@@ -19,8 +18,6 @@ export const GET = async (request: NextRequest) => {
                 'Query params are not a valid numbers',
             );
         }
-
-        await dbConnect();
 
         const data = await getTzimerim(+skip, +limit);
 

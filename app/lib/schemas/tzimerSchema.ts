@@ -7,13 +7,21 @@ if (!tzimerCollection)
 
 const schema = new mongoose.Schema(
     {
+        siteId: { type: Number, required: true },
         name: { type: String, required: true },
         description: { type: String, required: true },
         location: { type: String, required: true },
-        pricePerWeekdayNight: { type: Number, required: true },
-        pricePerWeekendNight: { type: Number, required: true },
+        unavailableDates: [
+            new mongoose.Schema(
+                {
+                    checkIn: { type: Date, required: true },
+                    checkOut: { type: Date, required: true },
+                },
+                { _id: false },
+            ),
+        ],
     },
-    { collection: process.env.TZIMERIM_COLLECTION_NAME },
+    { collection: process.env.TZIMERIM_COLLECTION_NAME, strict: true },
 );
 
 const TzimerSchema =

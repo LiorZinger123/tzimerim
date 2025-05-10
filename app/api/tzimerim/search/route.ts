@@ -2,20 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchTzimerim } from '@/app/lib/services/tzimerimService';
 import { API_RESPONSES } from '@/app/utils/globals';
 import dbConnect from '@/app/lib/mongodb';
+import { getQueryParams } from '@/app/utils/helper';
 
+//Search tzimer - for admin
 export const GET = async (request: NextRequest) => {
     try {
-        await dbConnect();
+        const search = getQueryParams(request, 'search');
 
-        const urlString = request.url ?? '';
-        const { searchParams } = new URL(urlString);
-        const query = searchParams.get('query');
-
-        if (!query) {
-            return API_RESPONSES.BAD_REQUEST('Missing query params');
+        if (!search) {
+            return API_RESPONSES.BAD_REQUEST('Missing query params: search');
         }
 
-        const data = await searchTzimerim(query);
+        await dbConnect();
+
+        const data = await searchTzimerim(search);
 
         return API_RESPONSES.OK(data);
     } catch {

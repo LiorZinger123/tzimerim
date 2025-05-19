@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/@prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -8,41 +8,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model booking {
+model Bookings {
   id        Int      @id @default(autoincrement())
   roomId    Int
+  resortId  Int      
   startDate DateTime
   endDate   DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  room      Rooms    @relation(fields: [roomId], references: [id])
+  resort    Resorts  @relation(fields: [resortId], references: [id])
   @@index([roomId], map: "Booking_roomId_fkey")
+  @@index([resortId], map: "Bookings_resortId_fkey") 
 }
 
-model tzimer {
+model Resorts {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   description String
   location    String
   region      String
+  rooms       Rooms[]   
+  users       Users[]
+  bookings    Bookings[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model room {
+model Rooms {
   id        Int      @id @default(autoincrement())
   name      String
   type      String
   capacity  Int
   price     Float
   resortId  Int
+  bookings  Bookings[]  
+  resort    Resorts @relation(fields: [resortId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([resortId], map: "Room_resortId_fkey")
+  @@index([resortId], map: "Rooms_resortId_fkey")
 }
 
-model user {
+model Users {
   id        Int      @id @default(autoincrement())
   name      String
   email     String
@@ -51,5 +60,6 @@ model user {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([resortId], map: "User_resortId_fkey")
+  resort    Resorts @relation(fields: [resortId], references: [id])
+  @@index([resortId], map: "Users_resortId_fkey")
 }

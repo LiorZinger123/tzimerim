@@ -35,9 +35,9 @@ export const API_RESPONSES = {
             { status: 409 },
         );
     },
-    INTERNAL_SERVER_ERROR: () => {
+    INTERNAL_SERVER_ERROR: (msg?: string) => {
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: msg || 'Internal server error' },
             { status: 500 },
         );
     },

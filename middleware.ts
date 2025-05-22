@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export function middleware(request: NextRequest) {
     const origin = request.headers.get('Origin');
     const apiKey = process.env.X_API_KEY;
-    const headerApiKey = request.headers.get('authorization');
+    const headerApiKey = request.headers.get('x-api-key');
 
     // if (origin !== process.env.ALLOWED_ORIGIN) {
     //     return new NextResponse(
